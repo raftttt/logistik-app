@@ -52,9 +52,20 @@
         </div>
     </div>
 
+    <div class="col-md-3">
+         <div class="card text-white bg-warning mb-3">
+             <div class="card-body">
+                <h4>Jumlah Pengiriman</h4>
+                <h2><?= $jumlah_pengiriman ?></h2>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <a class="btn btn-outline-primary mt-3" href="/barang">Kelola Barang</a>
 <a class="btn btn-outline-dark mt-3" href="/kategori">Kelola Kategori</a>
+<a href="/pengiriman" class="btn btn-outline-primary">Tracking Pengiriman</a>
+
 
 <?= $this->endSection(); ?>

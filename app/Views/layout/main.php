@@ -19,6 +19,15 @@
 </nav>
 
 <div class="container mt-4">
+
+    <?php if (current_url() != base_url('/dashboard')): ?>
+    <a href="/dashboard"
+        style="position: absolute; right: 20px; bot: 70px;"
+        class="btn btn-dark btn-sm shadow">
+   ← Dashboard
+    </a>
+    <?php endif; ?>
+
     <?= $this->renderSection('content'); ?>
 </div>
 
