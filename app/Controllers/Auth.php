@@ -22,7 +22,7 @@ class Auth extends BaseController
     if ($user && $user['password'] == $password) {
         session()->set('logged_in', true);
         session()->set('username', $user['username']);
-        return redirect()->to('/barang');
+        return redirect()->to('/dashboard');
     }
 
     return redirect()->back()->with('error', 'Username atau password salah');

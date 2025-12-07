@@ -16,6 +16,8 @@ $routes->post('/auth/login', 'Auth::loginProcess');
 $routes->post('/login/process', 'Auth::loginProcess');
 $routes->get('/logout', 'Auth::logout');
 $routes->get('/barang', 'Barang::index');
+$routes->get('/dashboard', 'Dashboard::index');
+
 
 
 

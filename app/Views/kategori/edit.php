@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Kategori</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<?= $this->extend('layout/main'); ?>
+<?= $this->section('content'); ?>
+
 
 <div class="container mt-4">
     <h3 class="mb-3">Edit Kategori</h3>
@@ -20,5 +16,4 @@
     </form>
 </div>
 
-</body>
-</html>
+<?= $this->endSection(); ?>
