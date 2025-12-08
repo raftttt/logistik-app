@@ -1,71 +1,48 @@
-<?= $this->extend('layout/main'); ?>
-<?= $this->section('content'); ?>
+<?= $this->extend('layout/main') ?>
+<?= $this->section('content') ?>
 
-<h3>Dashboard Gudang Logistik</h3>
-<p class="text-muted">Selamat datang, <strong><?= session()->get('username'); ?></strong> 👋</p>
+<h2 class="fw-bold mb-3">Dashboard Gudang 🚛</h2>
+<p>Selamat datang kembali, <b><?= session('username') ?></b> 👋</p>
 
-<div class="row">
+<div class="row g-3">
 
     <div class="col-md-3">
-        <div class="card bg-primary text-white shadow mb-3">
-            <div class="card-body">
-                <h5>Total Barang</h5>
-                <h2><?= $jumlah_barang; ?></h2>
-            </div>
+        <div class="card shadow border-0 bg-primary text-white p-3">
+            <h6>Total Barang</h6>
+            <h3><?= $jumlah_barang ?></h3>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card bg-dark text-white shadow mb-3">
-            <div class="card-body">
-                <h5>Total Kategori</h5>
-                <h2><?= $jumlah_kategori; ?></h2>
-            </div>
+        <div class="card shadow border-0 bg-dark text-white p-3">
+            <h6>Total Kategori</h6>
+            <h3><?= $jumlah_kategori ?></h3>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card bg-success text-white shadow mb-3">
-            <div class="card-body">
-                <h6>Stok Terbanyak</h6>
-                <?php if ($stok_terbanyak): ?>
-                    <strong><?= $stok_terbanyak['nama_barang']; ?></strong>
-                    <p><?= $stok_terbanyak['stok']; ?> unit</p>
-                <?php else: ?>
-                    <p>-</p>
-                <?php endif ?>
-            </div>
+        <div class="card shadow border-0 bg-success text-white p-3">
+            <h6>Stok Terbanyak</h6>
+            <h5><?= $stok_terbanyak['nama_barang'] ?></h5>
+            <small><?= $stok_terbanyak['stok'] ?> unit</small>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card bg-danger text-white shadow mb-3">
-            <div class="card-body">
-                <h6>Stok Terkecil</h6>
-                <?php if ($stok_termiskin): ?>
-                    <strong><?= $stok_termiskin['nama_barang']; ?></strong>
-                    <p><?= $stok_termiskin['stok']; ?> unit</p>
-                <?php else: ?>
-                    <p>-</p>
-                <?php endif ?>
-            </div>
+        <div class="card shadow border-0 bg-danger text-white p-3">
+            <h6>Stok Terkecil</h6>
+            <h5><?= $stok_terminim['nama_barang'] ?></h5>
+            <small><?= $stok_terminim['stok'] ?> unit</small>
         </div>
     </div>
-
-    <div class="col-md-3">
-         <div class="card text-white bg-warning mb-3">
-             <div class="card-body">
-                <h4>Jumlah Pengiriman</h4>
-                <h2><?= $jumlah_pengiriman ?></h2>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<a class="btn btn-outline-primary mt-3" href="/barang">Kelola Barang</a>
-<a class="btn btn-outline-dark mt-3" href="/kategori">Kelola Kategori</a>
-<a href="/pengiriman" class="btn btn-outline-primary">Tracking Pengiriman</a>
+<hr>
 
+<div>
+    <a href="/barang" class="btn btn-primary">Kelola Barang</a>
+    <a href="/kategori" class="btn btn-secondary">Kelola Kategori</a>
+    <a href="/pengiriman" class="btn btn-success">Kelola Pengiriman</a>
+</div>
 
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

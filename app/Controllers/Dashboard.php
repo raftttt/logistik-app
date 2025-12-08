@@ -26,7 +26,7 @@ class Dashboard extends BaseController
             ->orderBy('stok', 'DESC')
             ->first();
 
-        $data['stok_termiskin'] = $barangModel
+        $data['stok_terminim'] = $barangModel
             ->select('nama_barang, stok')
             ->orderBy('stok', 'ASC')
             ->first();

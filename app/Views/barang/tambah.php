@@ -1,41 +1,29 @@
-<?= $this->extend('layout/main'); ?>
-<?= $this->section('content'); ?>
+<div class="card p-4 shadow border-0">
+    <h4 class="fw-bold mb-3">Tambah Barang</h4>
 
-<h3 class="mb-3">Tambah Barang</h3>
-
-<form action="/barang/simpan" method="post" enctype="multipart/form-data">
-
-    <div class="mb-3">
+    <form method="post" enctype="multipart/form-data">
+        
         <label>Nama Barang</label>
-        <input type="text" name="nama_barang" class="form-control" required>
-    </div>
+        <input name="nama_barang" class="form-control mb-2" required>
 
-    <div class="mb-3">
         <label>Kategori</label>
-        <select name="id_kategori" class="form-control">
-            <?php foreach ($kategori as $k): ?>
+        <select name="id_kategori" class="form-control mb-2">
+            <?php foreach($kategori as $k): ?>
                 <option value="<?= $k['id'] ?>"><?= $k['nama_kategori'] ?></option>
             <?php endforeach ?>
         </select>
-    </div>
 
-    <div class="mb-3">
-        <label>Harga</label>
-        <input type="number" name="harga" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
         <label>Stok</label>
-        <input type="number" name="stok" class="form-control" required>
-    </div>
+        <input type="number" name="stok" class="form-control mb-2">
 
-    <div class="mb-3">
+        <label>Harga</label>
+        <input type="number" name="harga" class="form-control mb-2">
+
         <label>Foto</label>
-        <input type="file" name="foto" class="form-control">
-    </div>
+        <input type="file" name="foto" class="form-control mb-3">
 
-    <button class="btn btn-primary">Simpan</button>
-    <a href="/barang" class="btn btn-secondary">Kembali</a>
-</form>
+        <button class="btn btn-success">Simpan ✔</button>
+        <a href="/barang" class="btn btn-secondary">Kembali</a>
 
-<?= $this->endSection(); ?>
+    </form>
+</div>

@@ -4,6 +4,7 @@ namespace Config;
 
 use CodeIgniter\Config\AutoloadConfig;
 
+
 /**
  * -------------------------------------------------------------------
  * AUTOLOADER CONFIGURATION
@@ -38,8 +39,10 @@ class Autoload extends AutoloadConfig
      * @var array<string, list<string>|string>
      */
     public $psr4 = [
-        APP_NAMESPACE => APPPATH,
+    'App' => APPPATH,
+    'phpqrcode' => APPPATH.'Libraries/phpqrcode'
     ];
+
 
     /**
      * -------------------------------------------------------------------
@@ -88,5 +91,7 @@ class Autoload extends AutoloadConfig
      *
      * @var list<string>
      */
-    public $helpers = ['qrhelper'];
+    
+    public $helpers = ['qr'];
+
 }

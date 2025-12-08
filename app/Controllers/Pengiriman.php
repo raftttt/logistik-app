@@ -10,22 +10,20 @@ class Pengiriman extends BaseController
 {
     public function index()
     {
-        $this->cekLogin();
+    $model = new PengirimanModel();
+    $data['title'] = "Kelola Pengiriman";
+    $data['pengiriman'] = $model->getPengirimanFull();
 
-        $pengirimanModel = new PengirimanModel();
-        $data['pengiriman'] = $pengirimanModel
-            ->select('pengiriman.*, barang.nama_barang, kurir.nama as nama_kurir')
-            ->join('barang', 'barang.id = pengiriman.id_barang')
-            ->join('kurir', 'kurir.id = pengiriman.id_kurir')
-            ->findAll();
-
-        return view('pengiriman/index', $data);
+    return view('pengiriman/index', $data);
     }
+
 
     public function tambah()
     {
+        $this->cekLogin();
+
         $barang = new BarangModel();
-        $kurir  = new KurirModel();
+        $kurir = new KurirModel();
 
         $data['barang'] = $barang->findAll();
         $data['kurir']  = $kurir->findAll();
@@ -35,26 +33,33 @@ class Pengiriman extends BaseController
 
     public function simpan()
     {
-        $pengiriman = new PengirimanModel();
-        
-        $pengiriman->save([
-            'id_barang' => $this->request->getPost('id_barang'),
-            'id_kurir'  => $this->request->getPost('id_kurir'),
-            'tanggal'   => date('Y-m-d'),
-            'status'    => 'PICKUP',
-        ]);
+    helper('qr');
+    $model = new PengirimanModel();
 
-        return redirect()->to('/pengiriman');
+    // generate resi otomatis
+    $resi = 'RESI-'.time().rand(10,99);
+
+    // generate qr
+    $qrPath = generateQR($resi);
+
+    $model->insert([
+        'id_barang' => $this->request->getPost('id_barang'),
+        'id_kurir'  => $this->request->getPost('id_kurir'),
+        'resi'      => $resi,
+        'qr'        => $qrPath,
+        'status'    => 'diproses'
+    ]);
+
+    return redirect()->to('/pengiriman');
     }
 
-    public function updateStatus($id)
-    {
-        $pengiriman = new PengirimanModel();
 
-        $pengiriman->update($id, [
-            'status'  => $this->request->getPost('status'),
-            'catatan' => $this->request->getPost('catatan'),
-        ]);
+    public function ubahStatus($id)
+    {
+        $model = new PengirimanModel();
+        $status = $this->request->getPost('status');
+
+        $model->update($id, ['status' => $status]);
 
         return redirect()->to('/pengiriman');
     }

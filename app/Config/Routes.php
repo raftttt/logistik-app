@@ -27,6 +27,10 @@ $routes->get('/barangkeluar/status/(:num)/(:alpha)', 'BarangKeluar::ubahStatus/$
 $routes->get('/barang/scan/(:num)', 'Barang::scan/$1');
 $routes->get('/qrtest', 'TestQR::index');
 $routes->get('/barang/detail/(:num)', 'Barang::detail/$1');
+$routes->get('/kurir', 'Kurir::index');
+$routes->get('/kurir/tambah', 'Kurir::tambah');
+$routes->post('/kurir/simpan', 'Kurir::simpan');
+$routes->get('/kurir/hapus/(:num)', 'Kurir::hapus/$1');
 $routes->group('barang', function($routes){
     $routes->get('/', 'Barang::index');        
     $routes->get('tambah', 'Barang::tambah');  
@@ -39,12 +43,12 @@ $routes->group('barang', function($routes){
 
     $routes->get('hapus/(:num)', 'Barang::hapus/$1'); // kamu belum buat hapus(), harus bikin
 });
-$routes->group('pengiriman', function($routes){
-    $routes->get('/', 'Pengiriman::index');
-    $routes->get('tambah', 'Pengiriman::tambah');
-    $routes->post('simpan', 'Pengiriman::simpan');
-    $routes->post('update/(:num)', 'Pengiriman::updateStatus/$1');
-});
+$routes->get('/pengiriman', 'Pengiriman::index');
+$routes->get('/pengiriman/tambah', 'Pengiriman::tambah');
+$routes->post('/pengiriman/simpan', 'Pengiriman::simpan');
+$routes->post('/pengiriman/status/(:num)', 'Pengiriman::ubahStatus/$1');
+$routes->get('/tracking', 'Tracking::index');
+$routes->post('/tracking/cari', 'Tracking::cari');
 
 
 
