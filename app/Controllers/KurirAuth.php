@@ -13,13 +13,22 @@ class KurirAuth extends BaseController
         $nama     = $this->request->getPost('nama');
         $password = $this->request->getPost('password');
 
+        if (!$this->validate([
+            'nama' => 'required',
+            'password' => 'required',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Nama dan password wajib diisi');
+        }
+
         $kurir = $model->where('nama', $nama)->first();
 
         if (!$kurir) {
             return redirect()->back()->with('error', 'Akun tidak ditemukan');
         }
 
-        if ($password != $kurir['password']) {
+        $isValidPassword = password_verify($password, $kurir['password']) || $password === $kurir['password'];
+
+        if (!$isValidPassword) {
             return redirect()->back()->with('error', 'Password salah');
         }
 

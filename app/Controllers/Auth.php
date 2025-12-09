@@ -17,9 +17,22 @@ class Auth extends BaseController
         $username  = $this->request->getPost('username');
         $password  = $this->request->getPost('password');
 
+        if (!$this->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Username dan password wajib diisi');
+        }
+
         $user = $userModel->where('username', $username)->first();
 
-        if ($user && $user['password'] == $password) {
+        $isValidPassword = $user && (
+            password_verify($password, $user['password']) ||
+            $user['password'] === $password
+        );
+
+        if ($isValidPassword) {
+            session()->regenerate();
             session()->set('logged_in', true);
             session()->set('username', $user['username']);
 

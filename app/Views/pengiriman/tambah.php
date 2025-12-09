@@ -13,6 +13,18 @@
                 <a href="/pengiriman" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
             </div>
 
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger mb-3">
+                    <?= session()->getFlashdata('error'); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="alert alert-success mb-3">
+                    <?= session()->getFlashdata('success'); ?>
+                </div>
+            <?php endif; ?>
+
             <form action="/pengiriman/simpan" method="post" class="mt-3">
                 <div class="mb-3">
                     <label class="fw-semibold">Pilih Barang</label>

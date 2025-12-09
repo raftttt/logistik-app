@@ -50,23 +50,46 @@ class BarangMasuk extends BaseController
     {
         $this->cekLogin();
 
-        $model = new BarangMasukModel();
+        if (!$this->validate([
+            'id_barang' => 'required|is_natural_no_zero',
+            'jumlah'    => 'required|is_natural_no_zero',
+            'supplier'  => 'permit_empty|string',
+            'keterangan'=> 'permit_empty|string',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Isi data barang dan jumlah dengan benar');
+        }
 
-        $model->save([
-            'id_barang' => $this->request->getPost('id_barang'),
-            'jumlah_masuk' => $this->request->getPost('jumlah'),
-            'tanggal' => date('Y-m-d'),
-            'supplier' => $this->request->getPost('supplier'),
-            'keterangan' => $this->request->getPost('keterangan'),
-        ]);
-
-        // update stok barang
         $barangModel = new BarangModel();
-        $barang = $barangModel->find($this->request->getPost('id_barang'));
-        $barangModel->update($barang['id'], [
-            'stok' => $barang['stok'] + $this->request->getPost('jumlah')
+        $barang      = $barangModel->find($this->request->getPost('id_barang'));
+
+        if (!$barang) {
+            return redirect()->back()->withInput()->with('error', 'Barang tidak ditemukan');
+        }
+
+        $jumlahMasuk = (int) $this->request->getPost('jumlah');
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $model = new BarangMasukModel();
+        $model->save([
+            'id_barang'     => $barang['id'],
+            'jumlah_masuk'  => $jumlahMasuk,
+            'tanggal'       => date('Y-m-d'),
+            'supplier'      => $this->request->getPost('supplier'),
+            'keterangan'    => $this->request->getPost('keterangan'),
         ]);
 
-        return redirect()->to('/barangmasuk');
+        $barangModel->update($barang['id'], [
+            'stok' => $barang['stok'] + $jumlahMasuk,
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data barang masuk');
+        }
+
+        return redirect()->to('/barangmasuk')->with('success', 'Barang masuk berhasil disimpan');
     }
 }

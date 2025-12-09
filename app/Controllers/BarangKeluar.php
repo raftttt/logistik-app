@@ -50,25 +50,52 @@ class BarangKeluar extends BaseController
     {
         $this->cekLogin();
 
-        $model = new BarangKeluarModel();
+        if (!$this->validate([
+            'id_barang' => 'required|is_natural_no_zero',
+            'jumlah'    => 'required|is_natural_no_zero',
+            'penerima'  => 'required|string',
+            'kurir'     => 'required|string',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Lengkapi data barang keluar terlebih dahulu');
+        }
 
-        $model->save([
-            'id_barang' => $this->request->getPost('id_barang'),
-            'jumlah_keluar' => $this->request->getPost('jumlah'),
-            'tanggal' => date('Y-m-d'),
-            'penerima' => $this->request->getPost('penerima'),
-            'kurir' => $this->request->getPost('kurir'),
-            'status' => 'diproses'
-        ]);
-
-        // update stok barang
         $barangModel = new BarangModel();
-        $barang = $barangModel->find($this->request->getPost('id_barang'));
-        $barangModel->update($barang['id'], [
-            'stok' => $barang['stok'] - $this->request->getPost('jumlah')
+        $barang      = $barangModel->find($this->request->getPost('id_barang'));
+
+        if (!$barang) {
+            return redirect()->back()->withInput()->with('error', 'Barang tidak ditemukan');
+        }
+
+        $jumlahKeluar = (int) $this->request->getPost('jumlah');
+
+        if ($jumlahKeluar > (int) $barang['stok']) {
+            return redirect()->back()->withInput()->with('error', 'Stok tidak mencukupi');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $model = new BarangKeluarModel();
+        $model->save([
+            'id_barang'     => $barang['id'],
+            'jumlah_keluar' => $jumlahKeluar,
+            'tanggal'       => date('Y-m-d'),
+            'penerima'      => $this->request->getPost('penerima'),
+            'kurir'         => $this->request->getPost('kurir'),
+            'status'        => 'diproses'
         ]);
 
-        return redirect()->to('/barangkeluar');
+        $barangModel->update($barang['id'], [
+            'stok' => $barang['stok'] - $jumlahKeluar
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data barang keluar');
+        }
+
+        return redirect()->to('/barangkeluar')->with('success', 'Barang keluar berhasil disimpan');
     }
 
    public function ubahStatus($id, $status)
