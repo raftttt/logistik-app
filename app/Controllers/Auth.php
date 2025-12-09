@@ -12,21 +12,35 @@ class Auth extends BaseController
     }
 
     public function loginProcess()
-{
-    $userModel = new UserModel();
-    $username = $this->request->getPost('username');
-    $password = $this->request->getPost('password');
+    {
+        $userModel = new UserModel();
+        $username  = $this->request->getPost('username');
+        $password  = $this->request->getPost('password');
 
-    $user = $userModel->where('username', $username)->first();
+        if (!$this->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Username dan password wajib diisi');
+        }
 
-    if ($user && $user['password'] == $password) {
-        session()->set('logged_in', true);
-        session()->set('username', $user['username']);
-        return redirect()->to('/dashboard');
+        $user = $userModel->where('username', $username)->first();
+
+        $isValidPassword = $user && (
+            password_verify($password, $user['password']) ||
+            $user['password'] === $password
+        );
+
+        if ($isValidPassword) {
+            session()->regenerate();
+            session()->set('logged_in', true);
+            session()->set('username', $user['username']);
+
+            return redirect()->to('/dashboard');
+        }
+
+        return redirect()->back()->with('error', 'Username atau password salah');
     }
-
-    return redirect()->back()->with('error', 'Username atau password salah');
-}
 
 
     public function logout()

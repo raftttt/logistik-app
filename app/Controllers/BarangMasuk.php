@@ -9,31 +9,30 @@ class BarangMasuk extends BaseController
 {
     public function index()
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $barangMasukModel = new BarangMasukModel();
+        $barangMasukModel = new BarangMasukModel();
+        $keyword          = $this->request->getGet('search');
 
-    $keyword = $this->request->getGet('search');
-
-    if ($keyword) {
-        $data['masuk'] = $barangMasukModel
-            ->select('barang_masuk.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_masuk.id_barang')
-            ->groupStart()
+        if ($keyword) {
+            $data['masuk'] = $barangMasukModel
+                ->select('barang_masuk.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_masuk.id_barang')
+                ->groupStart()
                 ->like('barang.nama_barang', $keyword)
                 ->orLike('supplier', $keyword)
-            ->groupEnd()
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    } else {
-        $data['masuk'] = $barangMasukModel
-            ->select('barang_masuk.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_masuk.id_barang')
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    }
+                ->groupEnd()
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        } else {
+            $data['masuk'] = $barangMasukModel
+                ->select('barang_masuk.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_masuk.id_barang')
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        }
 
-    return view('barang_masuk/index', $data);
+        return view('barang_masuk/index', $data);
     }
 
 
@@ -49,23 +48,48 @@ class BarangMasuk extends BaseController
 
     public function simpan()
     {
-        $model = new BarangMasukModel();
+        $this->cekLogin();
 
-        $model->save([
-            'id_barang' => $this->request->getPost('id_barang'),
-            'jumlah_masuk' => $this->request->getPost('jumlah'),
-            'tanggal' => date('Y-m-d'),
-            'supplier' => $this->request->getPost('supplier'),
-            'keterangan' => $this->request->getPost('keterangan'),
-        ]);
+        if (!$this->validate([
+            'id_barang' => 'required|is_natural_no_zero',
+            'jumlah'    => 'required|is_natural_no_zero',
+            'supplier'  => 'permit_empty|string',
+            'keterangan'=> 'permit_empty|string',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Isi data barang dan jumlah dengan benar');
+        }
 
-        // update stok barang
         $barangModel = new BarangModel();
-        $barang = $barangModel->find($this->request->getPost('id_barang'));
-        $barangModel->update($barang['id'], [
-            'stok' => $barang['stok'] + $this->request->getPost('jumlah')
+        $barang      = $barangModel->find($this->request->getPost('id_barang'));
+
+        if (!$barang) {
+            return redirect()->back()->withInput()->with('error', 'Barang tidak ditemukan');
+        }
+
+        $jumlahMasuk = (int) $this->request->getPost('jumlah');
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $model = new BarangMasukModel();
+        $model->save([
+            'id_barang'     => $barang['id'],
+            'jumlah_masuk'  => $jumlahMasuk,
+            'tanggal'       => date('Y-m-d'),
+            'supplier'      => $this->request->getPost('supplier'),
+            'keterangan'    => $this->request->getPost('keterangan'),
         ]);
 
-        return redirect()->to('/barangmasuk');
+        $barangModel->update($barang['id'], [
+            'stok' => $barang['stok'] + $jumlahMasuk,
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data barang masuk');
+        }
+
+        return redirect()->to('/barangmasuk')->with('success', 'Barang masuk berhasil disimpan');
     }
 }

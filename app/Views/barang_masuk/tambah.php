@@ -3,6 +3,14 @@
 
 <h3>Tambah Barang Masuk</h3>
 
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger"><?= session()->getFlashdata('error'); ?></div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success"><?= session()->getFlashdata('success'); ?></div>
+<?php endif; ?>
+
 <form action="/barangmasuk/simpan" method="post">
 
     <div class="mb-3">

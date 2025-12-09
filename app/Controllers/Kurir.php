@@ -20,11 +20,15 @@ class Kurir extends BaseController
 
     public function tambah()
     {
+        $this->cekLogin();
+
         return view('kurir/tambah');
     }
 
     public function simpan()
     {
+        $this->cekLogin();
+
         $model = new KurirModel();
 
         $model->insert([
@@ -38,6 +42,8 @@ class Kurir extends BaseController
 
     public function hapus($id)
     {
+        $this->cekLogin();
+
         $model = new KurirModel();
         $model->delete($id);
 
@@ -62,25 +68,25 @@ class Kurir extends BaseController
 
     public function update($id)
     {
-    if (!session()->get('kurir')) {
-        return redirect()->to('/kurir/login');
-    }
+        if (!session()->get('kurir')) {
+            return redirect()->to('/kurir/login');
+        }
 
-    $model = new \App\Models\PengirimanModel();
-    $data['pengiriman'] = $model->find($id);
+        $model               = new \App\Models\PengirimanModel();
+        $data['pengiriman'] = $model->find($id);
 
-    return view('kurir/update', $data);
+        return view('kurir/update', $data);
     }
 
     public function save($id)
     {
-    $model = new \App\Models\PengirimanModel();
+        $model = new \App\Models\PengirimanModel();
 
-    $status = $this->request->getPost('status');
+        $status = $this->request->getPost('status');
 
-    $model->update($id, ['status' => $status]);
+        $model->update($id, ['status' => $status]);
 
-    return redirect()->to('/kurir/dashboard')->with('success', 'Status diperbarui');
+        return redirect()->to('/kurir/dashboard')->with('success', 'Status diperbarui');
     }
 
 }

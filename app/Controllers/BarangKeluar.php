@@ -9,32 +9,31 @@ class BarangKeluar extends BaseController
 {
     public function index()
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $barangKeluarModel = new BarangKeluarModel();
+        $barangKeluarModel = new BarangKeluarModel();
+        $keyword           = $this->request->getGet('search');
 
-    $keyword = $this->request->getGet('search');
-
-    if ($keyword) {
-        $data['keluar'] = $barangKeluarModel
-            ->select('barang_keluar.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_keluar.id_barang')
-            ->groupStart()
+        if ($keyword) {
+            $data['keluar'] = $barangKeluarModel
+                ->select('barang_keluar.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_keluar.id_barang')
+                ->groupStart()
                 ->like('barang.nama_barang', $keyword)
                 ->orLike('kurir', $keyword)
                 ->orLike('penerima', $keyword)
-            ->groupEnd()
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    } else {
-        $data['keluar'] = $barangKeluarModel
-            ->select('barang_keluar.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_keluar.id_barang')
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    }
+                ->groupEnd()
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        } else {
+            $data['keluar'] = $barangKeluarModel
+                ->select('barang_keluar.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_keluar.id_barang')
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        }
 
-    return view('barang_keluar/index', $data);
+        return view('barang_keluar/index', $data);
     }
 
 
@@ -49,40 +48,70 @@ class BarangKeluar extends BaseController
 
     public function simpan()
     {
-        $model = new BarangKeluarModel();
+        $this->cekLogin();
 
-        $model->save([
-            'id_barang' => $this->request->getPost('id_barang'),
-            'jumlah_keluar' => $this->request->getPost('jumlah'),
-            'tanggal' => date('Y-m-d'),
-            'penerima' => $this->request->getPost('penerima'),
-            'kurir' => $this->request->getPost('kurir'),
-            'status' => 'diproses'
-        ]);
+        if (!$this->validate([
+            'id_barang' => 'required|is_natural_no_zero',
+            'jumlah'    => 'required|is_natural_no_zero',
+            'penerima'  => 'required|string',
+            'kurir'     => 'required|string',
+        ])) {
+            return redirect()->back()->withInput()->with('error', 'Lengkapi data barang keluar terlebih dahulu');
+        }
 
-        // update stok barang
         $barangModel = new BarangModel();
-        $barang = $barangModel->find($this->request->getPost('id_barang'));
-        $barangModel->update($barang['id'], [
-            'stok' => $barang['stok'] - $this->request->getPost('jumlah')
+        $barang      = $barangModel->find($this->request->getPost('id_barang'));
+
+        if (!$barang) {
+            return redirect()->back()->withInput()->with('error', 'Barang tidak ditemukan');
+        }
+
+        $jumlahKeluar = (int) $this->request->getPost('jumlah');
+
+        if ($jumlahKeluar > (int) $barang['stok']) {
+            return redirect()->back()->withInput()->with('error', 'Stok tidak mencukupi');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $model = new BarangKeluarModel();
+        $model->save([
+            'id_barang'     => $barang['id'],
+            'jumlah_keluar' => $jumlahKeluar,
+            'tanggal'       => date('Y-m-d'),
+            'penerima'      => $this->request->getPost('penerima'),
+            'kurir'         => $this->request->getPost('kurir'),
+            'status'        => 'diproses'
         ]);
 
-        return redirect()->to('/barangkeluar');
+        $barangModel->update($barang['id'], [
+            'stok' => $barang['stok'] - $jumlahKeluar
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data barang keluar');
+        }
+
+        return redirect()->to('/barangkeluar')->with('success', 'Barang keluar berhasil disimpan');
     }
 
    public function ubahStatus($id, $status)
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $allowed = ['diproses', 'dikirim', 'diterima'];
-    if (!in_array($status, $allowed)) {
-        return redirect()->back();
-    }
+        $allowed = ['diproses', 'dikirim', 'diterima'];
 
-    $model = new BarangKeluarModel();
-    $model->update($id, ['status' => $status]);
+        if (!in_array($status, $allowed)) {
+            return redirect()->back();
+        }
 
-    return redirect()->to('/barangkeluar');
+        $model = new BarangKeluarModel();
+        $model->update($id, ['status' => $status]);
+
+        return redirect()->to('/barangkeluar');
     }
 
 }
