@@ -9,31 +9,30 @@ class BarangMasuk extends BaseController
 {
     public function index()
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $barangMasukModel = new BarangMasukModel();
+        $barangMasukModel = new BarangMasukModel();
+        $keyword          = $this->request->getGet('search');
 
-    $keyword = $this->request->getGet('search');
-
-    if ($keyword) {
-        $data['masuk'] = $barangMasukModel
-            ->select('barang_masuk.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_masuk.id_barang')
-            ->groupStart()
+        if ($keyword) {
+            $data['masuk'] = $barangMasukModel
+                ->select('barang_masuk.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_masuk.id_barang')
+                ->groupStart()
                 ->like('barang.nama_barang', $keyword)
                 ->orLike('supplier', $keyword)
-            ->groupEnd()
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    } else {
-        $data['masuk'] = $barangMasukModel
-            ->select('barang_masuk.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_masuk.id_barang')
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    }
+                ->groupEnd()
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        } else {
+            $data['masuk'] = $barangMasukModel
+                ->select('barang_masuk.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_masuk.id_barang')
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        }
 
-    return view('barang_masuk/index', $data);
+        return view('barang_masuk/index', $data);
     }
 
 
@@ -49,6 +48,8 @@ class BarangMasuk extends BaseController
 
     public function simpan()
     {
+        $this->cekLogin();
+
         $model = new BarangMasukModel();
 
         $model->save([

@@ -10,11 +10,13 @@ class Pengiriman extends BaseController
 {
     public function index()
     {
-    $model = new PengirimanModel();
-    $data['title'] = "Kelola Pengiriman";
-    $data['pengiriman'] = $model->getPengirimanFull();
+        $this->cekLogin();
 
-    return view('pengiriman/index', $data);
+        $model               = new PengirimanModel();
+        $data['title']       = "Kelola Pengiriman";
+        $data['pengiriman'] = $model->getPengirimanFull();
+
+        return view('pengiriman/index', $data);
     }
 
 
@@ -33,30 +35,35 @@ class Pengiriman extends BaseController
 
     public function simpan()
     {
-    helper('qr');
-    $model = new PengirimanModel();
+        $this->cekLogin();
 
-    // generate resi otomatis
-    $resi = 'RESI-'.time().rand(10,99);
+        helper('qr');
 
-    // generate qr
-    $qrPath = generateQR($resi);
+        $model = new PengirimanModel();
 
-    $model->insert([
-        'id_barang' => $this->request->getPost('id_barang'),
-        'id_kurir'  => $this->request->getPost('id_kurir'),
-        'resi'      => $resi,
-        'qr'        => $qrPath,
-        'status'    => 'diproses'
-    ]);
+        // generate resi otomatis
+        $resi = 'RESI-' . time() . rand(10, 99);
 
-    return redirect()->to('/pengiriman');
+        // generate qr
+        $qrPath = generateQR($resi);
+
+        $model->insert([
+            'id_barang' => $this->request->getPost('id_barang'),
+            'id_kurir'  => $this->request->getPost('id_kurir'),
+            'resi'      => $resi,
+            'qr'        => $qrPath,
+            'status'    => 'diproses'
+        ]);
+
+        return redirect()->to('/pengiriman');
     }
 
 
     public function ubahStatus($id)
     {
-        $model = new PengirimanModel();
+        $this->cekLogin();
+
+        $model  = new PengirimanModel();
         $status = $this->request->getPost('status');
 
         $model->update($id, ['status' => $status]);

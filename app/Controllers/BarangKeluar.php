@@ -9,32 +9,31 @@ class BarangKeluar extends BaseController
 {
     public function index()
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $barangKeluarModel = new BarangKeluarModel();
+        $barangKeluarModel = new BarangKeluarModel();
+        $keyword           = $this->request->getGet('search');
 
-    $keyword = $this->request->getGet('search');
-
-    if ($keyword) {
-        $data['keluar'] = $barangKeluarModel
-            ->select('barang_keluar.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_keluar.id_barang')
-            ->groupStart()
+        if ($keyword) {
+            $data['keluar'] = $barangKeluarModel
+                ->select('barang_keluar.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_keluar.id_barang')
+                ->groupStart()
                 ->like('barang.nama_barang', $keyword)
                 ->orLike('kurir', $keyword)
                 ->orLike('penerima', $keyword)
-            ->groupEnd()
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    } else {
-        $data['keluar'] = $barangKeluarModel
-            ->select('barang_keluar.*, barang.nama_barang')
-            ->join('barang', 'barang.id = barang_keluar.id_barang')
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-    }
+                ->groupEnd()
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        } else {
+            $data['keluar'] = $barangKeluarModel
+                ->select('barang_keluar.*, barang.nama_barang')
+                ->join('barang', 'barang.id = barang_keluar.id_barang')
+                ->orderBy('tanggal', 'DESC')
+                ->findAll();
+        }
 
-    return view('barang_keluar/index', $data);
+        return view('barang_keluar/index', $data);
     }
 
 
@@ -49,6 +48,8 @@ class BarangKeluar extends BaseController
 
     public function simpan()
     {
+        $this->cekLogin();
+
         $model = new BarangKeluarModel();
 
         $model->save([
@@ -72,17 +73,18 @@ class BarangKeluar extends BaseController
 
    public function ubahStatus($id, $status)
     {
-    $this->cekLogin();
+        $this->cekLogin();
 
-    $allowed = ['diproses', 'dikirim', 'diterima'];
-    if (!in_array($status, $allowed)) {
-        return redirect()->back();
-    }
+        $allowed = ['diproses', 'dikirim', 'diterima'];
 
-    $model = new BarangKeluarModel();
-    $model->update($id, ['status' => $status]);
+        if (!in_array($status, $allowed)) {
+            return redirect()->back();
+        }
 
-    return redirect()->to('/barangkeluar');
+        $model = new BarangKeluarModel();
+        $model->update($id, ['status' => $status]);
+
+        return redirect()->to('/barangkeluar');
     }
 
 }
